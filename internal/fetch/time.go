@@ -10,9 +10,11 @@ import (
 
 func IsPuzzleReady(day, year int) (bool, time.Duration) {
 	now := time.Now()
-	dayStr := string(day)
+	var dayStr string
 	if day < 10 {
 		dayStr = fmt.Sprintf("0%v", day)
+	} else {
+		dayStr = fmt.Sprintf("%v", day)
 	}
 
 	aocDay, _ := time.Parse(time.RFC3339, fmt.Sprintf("%v-12-%sT00:00:00-05:00", year, dayStr))
