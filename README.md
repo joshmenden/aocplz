@@ -56,6 +56,20 @@ The `AOCPLZ_SESSION_TOKEN` is used to fetch your personal input data for the puz
 
 If no templates directory or files are provided, the program will use this repo's latest files from Github.
 
+### Customization
+
+As shipped, the `solution.rb` file is setup to use some helper methods from the `activesupport` gem and also comes ready to read in the input data from the day's puzzle.
+
+But what if you want to code in Golang? Python? Typescript?
+
+Easy. All you need to do is create a `templates` directory somewhere, and put all the files that you would want copied for each day into that directory. Make sure that they end with `.tmpl` (which will be stripped when they are copied into the day's puzzle folder).
+
+Set your `templates` directory's full path to the `AOCPLZ_TEMPLATES_DIR` environment variable, and comma-separate the files in that folder in the `AOCPLZ_TEMPLATE_FILES` variable.
+
+You can then put whatever you want into these files and they will get copied into each day!
+
+(Note: a `TODO` here would be to programatically iterate over all files in the template folder removing the need for the `AOCPLZ_TEMPLATE_FILES` variable)
+
 ## Installation
 
 You need Golang. Download it [here](https://go.dev/dl/) then make sure the `go version` runs succesfully.
