@@ -14,19 +14,19 @@ import (
 
 func FetchDayInput(day, year *int) (err error) {
 	printit.Info(fmt.Sprintf("Fetching input and creating test file for AOC%v day %v", *year, *day))
-	dir, err := createDir(*day)
+	solutionDir, err := createDir(*day)
 	if err != nil {
 		return
 	}
-	printit.Info(fmt.Sprintf("Created new directory: %s", dir))
+	printit.Info(fmt.Sprintf("Created new directory: %s", solutionDir))
 
-	err = fetchInput(*day, *year, dir)
+	err = fetchInput(*day, *year, solutionDir)
 	if err != nil {
 		return
 	}
 	printit.Info("Created new input.txt file with data")
 
-	filePath, err := createSolutionFiles(dir)
+	filePath, err := createSolutionFiles(solutionDir)
 	if err != nil {
 		return
 	}
@@ -90,13 +90,20 @@ func fetchInput(day, year int, dir string) (err error) {
 	return
 }
 
-func copyFile(srcPath, destPath string) (err error) {
-	bytesRead, err := ioutil.ReadFile(srcPath)
-	if err != nil {
-		return
+func copyFile(srcPath *string, destPath string, srcBytes *[]byte) (err error) {
+	var bytesToCopy []byte
+	if srcBytes == nil && srcPath != nil {
+		bytesToCopy, err = ioutil.ReadFile(*srcPath)
+		if err != nil {
+			return err
+		}
+	} else if srcBytes != nil {
+		bytesToCopy = *srcBytes
+	} else {
+		return fmt.Errorf("given neither a file path or bytes to copy")
 	}
 
-	err = ioutil.WriteFile(destPath, bytesRead, 0644)
+	err = ioutil.WriteFile(destPath, bytesToCopy, 0644)
 	if err != nil {
 		return
 	}
@@ -109,16 +116,13 @@ func copyFile(srcPath, destPath string) (err error) {
 	return
 }
 
-func createSolutionFiles(dir string) (files []string, err error) {
-	tmplsDir := os.Getenv("AOCPLZ_TEMPLATES_DIR")
-	tmplsStr := os.Getenv("AOCPLZ_TEMPLATE_FILES")
-	tmplsStrArr := strings.Split(tmplsStr, ",")
-
+func copyLocalFiles(templateDir, fileNames, solutionDir string) (files []string, err error) {
+	tmplsStrArr := strings.Split(fileNames, ",")
 	for _, tmplName := range tmplsStrArr {
 		destName := strings.ReplaceAll(tmplName, ".tmpl", "")
-		srcPath := fmt.Sprintf("%s/%s", tmplsDir, tmplName)
-		destPath := fmt.Sprintf("%s/%s", dir, destName)
-		err = copyFile(srcPath, destPath)
+		srcPath := fmt.Sprintf("%s/%s", templateDir, tmplName)
+		destPath := fmt.Sprintf("%s/%s", solutionDir, destName)
+		err = copyFile(&srcPath, destPath, nil)
 		if err != nil {
 			return
 		} else {
@@ -127,6 +131,21 @@ func createSolutionFiles(dir string) (files []string, err error) {
 	}
 
 	return
+}
+
+func copyGlobalFilesFromGithub() (files []string, err error) {
+	return
+}
+
+func createSolutionFiles(solutionDir string) (files []string, err error) {
+	tmplsDir := os.Getenv("AOCPLZ_TEMPLATES_DIR")
+	tmplsStr := os.Getenv("AOCPLZ_TEMPLATE_FILES")
+
+	if tmplsDir != "" && tmplsStr != "" {
+		return copyLocalFiles(tmplsDir, tmplsStr, solutionDir)
+	} else {
+		return copyGlobalFilesFromGithub()
+	}
 }
 
 func openPuzzle(day, year int) bool {
