@@ -48,31 +48,41 @@ func createDir(day int) (dir string, err error) {
 	return
 }
 
-func fetchInput(day, year int, dir string) (err error) {
-	url := fmt.Sprintf("https://adventofcode.com/%v/day/%v/input", year, day)
-
+func getRawDataFromURL(url string, aocReq bool) (*[]byte, error) {
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
-		return
+		return nil, err
 	}
 
-	req.AddCookie(&http.Cookie{Name: "session", Value: os.Getenv("AOCPLZ_SESSION_TOKEN")})
+	if aocReq {
+		req.AddCookie(&http.Cookie{Name: "session", Value: os.Getenv("AOCPLZ_SESSION_TOKEN")})
+	}
 
 	client := http.Client{}
 
 	resp, err := client.Do(req)
 	if err != nil {
-		return
+		return nil, err
 	}
 
 	defer resp.Body.Close()
 
-	raw, err := ioutil.ReadAll(resp.Body)
+	bytes, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	return &bytes, nil
+}
+
+func fetchInput(day, year int, dir string) (err error) {
+	url := fmt.Sprintf("https://adventofcode.com/%v/day/%v/input", year, day)
+	raw, err := getRawDataFromURL(url, true)
 	if err != nil {
 		return
 	}
 
-	err = os.WriteFile(fmt.Sprintf("%s/input.txt", dir), raw, 0644)
+	err = os.WriteFile(fmt.Sprintf("%s/input.txt", dir), *raw, 0644)
 	if err != nil {
 		return
 	}
