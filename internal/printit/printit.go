@@ -19,5 +19,5 @@ func Success(text string) {
 }
 
 func Error(text string) {
-	fmt.Println(string(colorRed), text, string(colorReset))
+	fmt.Println(string(colorRed), "𝘹", text, string(colorReset))
 }
