@@ -36,7 +36,7 @@ func main() {
 	waitPtr := fetchCmd.Bool("wait", false, "whether or not to wait for the puzzle to be ready")
 
 	if len(os.Args) < 2 {
-		invalidSubcommand()
+		handleError(fmt.Errorf("expected 'fetch' or 'solve' command"))
 	}
 
 	switch os.Args[1] {
