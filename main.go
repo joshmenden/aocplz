@@ -19,8 +19,6 @@ var (
 	requiredVars = []string{
 		"AOCPLZ_SESSION_TOKEN",
 		"AOCPLZ_ROOT_DIR",
-		"AOCPLZ_TEMPLATES_DIR",
-		"AOCPLZ_TEMPLATE_FILES",
 	}
 )
 

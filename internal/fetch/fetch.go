@@ -133,7 +133,31 @@ func copyLocalFiles(templateDir, fileNames, solutionDir string) (files []string,
 	return
 }
 
-func copyGlobalFilesFromGithub() (files []string, err error) {
+func copyGlobalFilesFromGithub(solutionDir string) (files []string, err error) {
+	solutionFileData, err := getRawDataFromURL("https://raw.githubusercontent.com/joshmenden/aocplz/main/templates/solution.rb.tmpl", false)
+	if err != nil {
+		return
+	}
+
+	err = copyFile(nil, fmt.Sprintf("%s/%s", solutionDir, "solution.rb"), solutionFileData)
+	if err != nil {
+		return
+	} else {
+		files = append(files, "github.com/.../solution.rb")
+	}
+
+	gemfileData, err := getRawDataFromURL("https://raw.githubusercontent.com/joshmenden/aocplz/main/templates/Gemfile.tmpl", false)
+	if err != nil {
+		return
+	}
+
+	err = copyFile(nil, fmt.Sprintf("%s/%s", solutionDir, "Gemfile"), gemfileData)
+	if err != nil {
+		return
+	} else {
+		files = append(files, "github.com/.../Gemfile")
+	}
+
 	return
 }
 
@@ -144,7 +168,7 @@ func createSolutionFiles(solutionDir string) (files []string, err error) {
 	if tmplsDir != "" && tmplsStr != "" {
 		return copyLocalFiles(tmplsDir, tmplsStr, solutionDir)
 	} else {
-		return copyGlobalFilesFromGithub()
+		return copyGlobalFilesFromGithub(solutionDir)
 	}
 }
 
