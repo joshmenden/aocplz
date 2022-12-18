@@ -11,7 +11,7 @@ This program is intended to be a lickity split way to get the day's Advent of Co
 Fetching input and creating test file for AOC 2022 day 1
 Created new directory: [...]/advent-of-code-2022/day-1      # creates a directory for the new day
 Created new input.txt file with data                        # pulls the input data from the puzzle and puts into a file
-Created new test files: [solution.rb Gemfile]               # creates template solution files for the day
+Created new test files: [a.rb Gemfile]                      # creates template solution files for the day
 Opening browser to relevant puzzle...                       # opens a browser window to the puzzle
  ✓ Fetch Complete, Happy Coding!
 ```
@@ -47,7 +47,7 @@ This program requires a handful of environment variables in order to run. I put 
 AOCPLZ_SESSION_TOKEN=[can be stolen from your cookies in the browser]   # required
 AOCPLZ_ROOT_DIR=[path to your parent aoc dir]/advent-of-code-2022       # required
 AOCPLZ_TEMPLATES_DIR=[path to aocplz repo or your own]/templates
-AOCPLZ_TEMPLATE_FILES=solution.rb.tmpl,Gemfile.tmpl
+AOCPLZ_TEMPLATE_FILES=a.rb.tmpl,Gemfile.tmpl
 ```
 
 The program will look in the `AOCPLZ_TEMPLATES_DIR` directory for comma-separated files directed by `AOCPLZ_TEMPLATE_FILES`, it will then copy these files into the day's folder of your `AOCPLZ_ROOT_DIR` directory.
@@ -58,7 +58,7 @@ If no templates directory or files are provided, the program will use this repo'
 
 ### Customization
 
-As shipped, the `solution.rb` file is setup to use some helper methods from the `activesupport` gem and also comes ready to read in the input data from the day's puzzle.
+As shipped, the `a.rb` file is setup to use some helper methods from the `activesupport` gem and also comes ready to read in the input data from the day's puzzle.
 
 But what if you want to code in Golang? Python? Typescript?
 
