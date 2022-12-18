@@ -87,6 +87,11 @@ func fetchInput(day, year int, dir string) (err error) {
 		return
 	}
 
+	err = os.WriteFile(fmt.Sprintf("%s/sample.txt", dir), nil, 0644)
+	if err != nil {
+		return
+	}
+
 	return
 }
 
