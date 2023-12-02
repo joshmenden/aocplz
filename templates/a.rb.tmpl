@@ -2,37 +2,20 @@
 
 require "byebug"
 require "active_support/all"
-require_relative "../aoc"
+require_relative "../aoc_solution"
 
-class Solution < AOC
-    def initialize(filename, params)
-      @data = File.read(filename)
-      @params = params
-      parse_data
-    end
+class Day < AOCSolution
+  def parse_data
+    # access @data to parse input
+  end
 
-    def parse_data
-    end
+  def pt1
+  end
 
-    def pt1
-    end
-
-    def pt2
-    end
+  def pt2
+  end
 end
 
 filename = "sample.txt"
 # filename = "input.txt"
-
-pt1_solution = nil
-pt1_time = Benchmark.realtime do
-  pt1_solution = Solution.new(filename, {}).pt1
-end
-
-pt2_solution = nil
-pt2_time = Benchmark.realtime do
-  pt2_solution = Solution.new(filename, {}).pt2
-end
-
-puts "pt1 solution: #{pt1_solution} (#{pt1_time.round(1)}s)"
-puts "pt2 solution: #{pt2_solution} (#{pt2_time.round(1)}s)"
+Day.new(filename).solve!
