@@ -2,8 +2,9 @@
 
 require "byebug"
 require "active_support/all"
+require_relative "../aoc"
 
-class Solution
+class Solution < AOC
     def initialize(filename, params)
       @data = File.read(filename)
       @params = params
@@ -20,6 +21,18 @@ class Solution
     end
 end
 
-filename = "input.txt"
-puts Solution.new(filename, {}).pt1
-puts Solution.new(filename, {}).pt2
+filename = "sample.txt"
+# filename = "input.txt"
+
+pt1_solution = nil
+pt1_time = Benchmark.realtime do
+  pt1_solution = Solution.new(filename, {}).pt1
+end
+
+pt2_solution = nil
+pt2_time = Benchmark.realtime do
+  pt2_solution = Solution.new(filename, {}).pt2
+end
+
+puts "pt1 solution: #{pt1_solution} (#{pt1_time.round(1)}s)"
+puts "pt2 solution: #{pt2_solution} (#{pt2_time.round(1)}s)"
