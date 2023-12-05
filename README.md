@@ -76,7 +76,7 @@ You need Golang. Download it [here](https://go.dev/dl/) then make sure the `go v
 
 Then, run:
 ```
-go install github.com/joshmenden/aocplz@latest
+go install github.com/joshmenden/aocplz@v0.4.1
 ```
 
 And you are ready to code!
