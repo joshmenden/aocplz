@@ -95,7 +95,7 @@ func fetchInput(day, year int, dir string) (err error) {
 	return
 }
 
-func copyFile(srcPath *string, destPath string, srcBytes *[]byte) (err error) {
+func copyFile(srcPath *string, destPath string, srcBytes *[]byte, executable *bool) (err error) {
 	var bytesToCopy []byte
 	if srcBytes == nil && srcPath != nil {
 		bytesToCopy, err = ioutil.ReadFile(*srcPath)
@@ -113,10 +113,12 @@ func copyFile(srcPath *string, destPath string, srcBytes *[]byte) (err error) {
 		return
 	}
 
-	err = os.Chmod(destPath, 0700)
-	if err != nil {
-		return
-	}
+    if executable != nil && *executable {
+        err = os.Chmod(destPath, 0700)
+        if err != nil {
+            return
+        }
+    }
 
 	return
 }
@@ -127,7 +129,9 @@ func copyLocalFiles(templateDir, fileNames, solutionDir string) (files []string,
 		destName := strings.ReplaceAll(tmplName, ".tmpl", "")
 		srcPath := fmt.Sprintf("%s/%s", templateDir, tmplName)
 		destPath := fmt.Sprintf("%s/%s", solutionDir, destName)
-		err = copyFile(&srcPath, destPath, nil)
+
+        executable := strings.Contains(destName, "a.rb")
+		err = copyFile(&srcPath, destPath, nil, &executable)
 		if err != nil {
 			return
 		} else {
@@ -144,7 +148,8 @@ func copyGlobalFilesFromGithub(solutionDir string) (files []string, err error) {
 		return
 	}
 
-	err = copyFile(nil, fmt.Sprintf("%s/%s", solutionDir, "a.rb"), solutionFileData)
+    executable := true
+	err = copyFile(nil, fmt.Sprintf("%s/%s", solutionDir, "a.rb"), solutionFileData, &executable)
 	if err != nil {
 		return
 	} else {
@@ -156,7 +161,7 @@ func copyGlobalFilesFromGithub(solutionDir string) (files []string, err error) {
 		return
 	}
 
-	err = copyFile(nil, fmt.Sprintf("%s/%s", solutionDir, "Gemfile"), gemfileData)
+	err = copyFile(nil, fmt.Sprintf("%s/%s", solutionDir, "Gemfile"), gemfileData, nil)
 	if err != nil {
 		return
 	} else {
@@ -168,7 +173,7 @@ func copyGlobalFilesFromGithub(solutionDir string) (files []string, err error) {
 		return
 	}
 
-	err = copyFile(nil, fmt.Sprintf("%s/%s", os.Getenv("AOCPLZ_ROOT_DIR"), "aoc_solution.rb"), aocSolutionData)
+	err = copyFile(nil, fmt.Sprintf("%s/%s", os.Getenv("AOCPLZ_ROOT_DIR"), "aoc_solution.rb"), aocSolutionData, nil)
 	if err != nil {
 		return
 	} else {
