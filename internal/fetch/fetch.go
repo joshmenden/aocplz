@@ -163,6 +163,18 @@ func copyGlobalFilesFromGithub(solutionDir string) (files []string, err error) {
 		files = append(files, "github.com/.../Gemfile")
 	}
 
+	aocSolutionData, err := getRawDataFromURL("https://raw.githubusercontent.com/joshmenden/aocplz/main/templates/aoc_solution.rb.tmpl", false)
+	if err != nil {
+		return
+	}
+
+	err = copyFile(nil, fmt.Sprintf("%s/%s", os.Getenv("AOCPLZ_ROOT_DIR"), "aoc_solution.rb"), aocSolutionData)
+	if err != nil {
+		return
+	} else {
+		files = append(files, "github.com/.../aoc_solution.rb")
+	}
+
 	return
 }
 
