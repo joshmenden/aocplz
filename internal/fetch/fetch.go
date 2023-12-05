@@ -12,7 +12,7 @@ import (
 	"github.com/joshmenden/aocplz/internal/printit"
 )
 
-func FetchDayInput(day, year *int) (err error) {
+func FetchDayInput(day, year *int, dontOpen *bool) (err error) {
 	printit.Info(fmt.Sprintf("Fetching input and creating test file for AOC%v day %v", *year, *day))
 	solutionDir, err := createDir(*day)
 	if err != nil {
@@ -32,11 +32,13 @@ func FetchDayInput(day, year *int) (err error) {
 	}
 	printit.Info(fmt.Sprintf("Created new test files: %s", filePath))
 
-	ok := openPuzzle(*day, *year)
-	if !ok {
-		return fmt.Errorf("could not open browser to puzzle")
-	}
-	printit.Info("Opening browser to relevant puzzle...")
+    if !*dontOpen {
+        ok := openPuzzle(*day, *year)
+        if !ok {
+            return fmt.Errorf("could not open browser to puzzle")
+        }
+        printit.Info("Opening browser to relevant puzzle...")
+    }
 
 	return
 }

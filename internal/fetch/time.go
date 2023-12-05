@@ -22,7 +22,7 @@ func IsPuzzleReady(day, year int) (bool, time.Duration) {
 	return now.After(aocDay), aocDay.Sub(now).Round(1 * time.Second)
 }
 
-func WaitForPuzzle(day, year *int) (err error) {
+func WaitForPuzzle(day, year *int, dontOpen *bool) (err error) {
 	waitTimeSeconds := 5
 
 	printit.Info((fmt.Sprintf("waiting for puzzle, checking every %v seconds...", waitTimeSeconds)))
@@ -39,7 +39,7 @@ func WaitForPuzzle(day, year *int) (err error) {
 				ready, diff := IsPuzzleReady(*day, *year)
 				if ready {
 					printit.Success("puzzle is ready! fetching now...")
-					err = FetchDayInput(day, year)
+					err = FetchDayInput(day, year, dontOpen)
 					close(quit)
 					wg.Done()
 				} else {
