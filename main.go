@@ -14,7 +14,7 @@ import (
 
 var (
 	now          = time.Now()
-	day          = now.Day()
+	day          = now.Day() + 1
 	year         = now.Year()
 	requiredVars = []string{
 		"AOCPLZ_SESSION_TOKEN",
