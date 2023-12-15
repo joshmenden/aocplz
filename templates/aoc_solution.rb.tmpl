@@ -78,13 +78,13 @@ class AOCSolution
       pt1_solution = pt1
     end
 
-    puts "Part 1 Solution: #{pt1_solution} (#{pt1_time.round(1)}s)"
+    puts "Part 1 Solution: #{pt1_solution} (#{pt1_time.round(5)}s)"
 
     pt2_solution = nil
     pt2_time = Benchmark.realtime do
       pt2_solution = pt2
     end
 
-    puts "Part 2 Solution: #{pt2_solution} (#{pt2_time.round(1)}s)"
+    puts "Part 2 Solution: #{pt2_solution} (#{pt2_time.round(5)}s)"
   end
 end
