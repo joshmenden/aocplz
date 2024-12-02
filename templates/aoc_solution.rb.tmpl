@@ -1,3 +1,6 @@
+require "byebug"
+require "active_support/all"
+
 class AOCSolution
   def initialize(filename, params: {})
     @data = File.read(filename)
@@ -13,7 +16,7 @@ class AOCSolution
   end
 
   def twod_arr(input)
-    input.split("\n").map {|l| l.split("") }
+    input.split("\n").map { |l| l.chars }
   end
 
   class Node
@@ -38,38 +41,38 @@ class AOCSolution
     def self.build!(root, nodes, raw_data)
       nodes[root.val] = root
 
-      root_i = raw_data.index {|rt,l,r| rt == root.val }
+      root_i = raw_data.index { |rt, l, r| rt == root.val }
       return root if root_i.nil?
 
-      rt, l, r = raw_data[root_i]
-      root.left = nodes.key?(l) ? root.left = nodes[l] : root.left = Graph.build!(Node.new(l), nodes, raw_data)
-      root.right = nodes.key?(r) ? root.right = nodes[r] : root.right = Graph.build!(Node.new(r), nodes, raw_data)
+      _, l, r = raw_data[root_i]
+      root.left = root.left = (nodes.key?(l) ? nodes[l] : Graph.build!(Node.new(l), nodes, raw_data))
+      root.right = root.right = (nodes.key?(r) ? nodes[r] : Graph.build!(Node.new(r), nodes, raw_data))
 
-      return root
+      root
     end
   end
 
-  def within_bounds?(twod_arr, r,c)
+  def within_bounds?(twod_arr, r, c)
     return false if r < 0
     return false if c < 0
     return false if r >= twod_arr.size
     return false if c >= twod_arr[0].size
 
-    return true
+    true
   end
 
   def extract_digits(str, single_digit: false, exclude_negative: false)
     regex = if single_digit && exclude_negative
-              /\d/
-            elsif single_digit
-              /-?\d/
-            elsif exclude_negative
-              /\d+/
-            else
-              /-?\d+/
-            end
+      /\d/
+    elsif single_digit
+      /-?\d/
+    elsif exclude_negative
+      /\d+/
+    else
+      /-?\d+/
+    end
 
-    return str.scan(regex).map(&:to_i)
+    str.scan(regex).map(&:to_i)
   end
 
   def solve!
