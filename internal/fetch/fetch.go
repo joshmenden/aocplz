@@ -2,10 +2,11 @@ package fetch
 
 import (
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"runtime"
 	"strings"
 
@@ -14,37 +15,37 @@ import (
 
 func FetchDayInput(day, year *int, dontOpen *bool) (err error) {
 	printit.Info(fmt.Sprintf("Fetching input and creating test file for AOC%v day %v", *year, *day))
-	solutionDir, err := createDir(*day)
+	dailySolutionDir, err := createDailySolutionDir(*day, *year)
 	if err != nil {
 		return
 	}
-	printit.Info(fmt.Sprintf("Created new directory: %s", solutionDir))
+	printit.Info(fmt.Sprintf("Created new directory: %s", dailySolutionDir))
 
-	err = fetchInput(*day, *year, solutionDir)
+	err = fetchInput(*day, *year, dailySolutionDir)
 	if err != nil {
 		return
 	}
-	printit.Info("Created new input.txt file with data")
+	printit.Info("Created new .txt files with the sample and the custom test input")
 
-	filePath, err := createSolutionFiles(solutionDir)
+	filePath, err := createSolutionFile(dailySolutionDir)
 	if err != nil {
 		return
 	}
-	printit.Info(fmt.Sprintf("Created new test files: %s", filePath))
+	printit.Info(fmt.Sprintf("Created new solution file: %s", filePath))
 
-    if !*dontOpen {
-        ok := openPuzzle(*day, *year)
-        if !ok {
-            return fmt.Errorf("could not open browser to puzzle")
-        }
-        printit.Info("Opening browser to relevant puzzle...")
-    }
+	if !*dontOpen {
+		ok := openPuzzle(*day, *year)
+		if !ok {
+			return fmt.Errorf("could not open browser to puzzle")
+		}
+		printit.Info("Opening browser to relevant puzzle...")
+	}
 
 	return
 }
 
-func createDir(day int) (dir string, err error) {
-	dir = fmt.Sprintf("%s/day-%v", os.Getenv("AOCPLZ_ROOT_DIR"), day)
+func createDailySolutionDir(day int, year int) (dir string, err error) {
+	dir = fmt.Sprintf("%s/%v/day-%v", os.Getenv("AOCPLZ_ROOT_DIR"), year, day)
 	err = os.Mkdir(dir, 0755)
 
 	return
@@ -69,7 +70,7 @@ func getRawDataFromURL(url string, aocReq bool) (*[]byte, error) {
 
 	defer resp.Body.Close()
 
-	bytes, err := ioutil.ReadAll(resp.Body)
+	bytes, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return nil, err
 	}
@@ -100,7 +101,7 @@ func fetchInput(day, year int, dir string) (err error) {
 func copyFile(srcPath *string, destPath string, srcBytes *[]byte, executable *bool) (err error) {
 	var bytesToCopy []byte
 	if srcBytes == nil && srcPath != nil {
-		bytesToCopy, err = ioutil.ReadFile(*srcPath)
+		bytesToCopy, err = os.ReadFile(*srcPath)
 		if err != nil {
 			return err
 		}
@@ -110,90 +111,49 @@ func copyFile(srcPath *string, destPath string, srcBytes *[]byte, executable *bo
 		return fmt.Errorf("given neither a file path or bytes to copy")
 	}
 
-	err = ioutil.WriteFile(destPath, bytesToCopy, 0644)
+	err = os.WriteFile(destPath, bytesToCopy, 0644)
 	if err != nil {
 		return
 	}
 
-    if executable != nil && *executable {
-        err = os.Chmod(destPath, 0700)
-        if err != nil {
-            return
-        }
-    }
-
-	return
-}
-
-func copyLocalFiles(templateDir, fileNames, solutionDir string) (files []string, err error) {
-	tmplsStrArr := strings.Split(fileNames, ",")
-	for _, tmplName := range tmplsStrArr {
-		destName := strings.ReplaceAll(tmplName, ".tmpl", "")
-		srcPath := fmt.Sprintf("%s/%s", templateDir, tmplName)
-		destPath := fmt.Sprintf("%s/%s", solutionDir, destName)
-
-        executable := strings.Contains(destName, "a.rb")
-		err = copyFile(&srcPath, destPath, nil, &executable)
+	if executable != nil && *executable {
+		err = os.Chmod(destPath, 0700)
 		if err != nil {
 			return
-		} else {
-			files = append(files, destName)
 		}
 	}
 
 	return
 }
 
-func copyGlobalFilesFromGithub(solutionDir string) (files []string, err error) {
-	solutionFileData, err := getRawDataFromURL("https://raw.githubusercontent.com/joshmenden/aocplz/main/templates/a.rb.tmpl", false)
+func createSolutionFile(dailySolutionDir string) (solutionPath string, err error) {
+	parentDir := filepath.Dir(dailySolutionDir)
+	files, err := os.ReadDir(parentDir)
 	if err != nil {
-		return
+		return "", err
 	}
 
-    executable := true
-	err = copyFile(nil, fmt.Sprintf("%s/%s", solutionDir, "a.rb"), solutionFileData, &executable)
+	var templatePath string
+	for _, file := range files {
+		if strings.HasSuffix(file.Name(), ".tmpl") {
+			templatePath = filepath.Join(parentDir, file.Name())
+			break
+		}
+	}
+
+	if templatePath == "" {
+		return "", fmt.Errorf("no template file found in %s", parentDir)
+	}
+
+	destFilename := strings.ReplaceAll(filepath.Base(templatePath), ".tmpl", "")
+	destPath := filepath.Join(dailySolutionDir, destFilename)
+	boolValue := true
+	err = copyFile(&templatePath, destPath, nil, &boolValue)
 	if err != nil {
-		return
-	} else {
-		files = append(files, "github.com/.../a.rb")
+		return "", err
 	}
 
-	gemfileData, err := getRawDataFromURL("https://raw.githubusercontent.com/joshmenden/aocplz/main/templates/Gemfile.tmpl", false)
-	if err != nil {
-		return
-	}
-
-	err = copyFile(nil, fmt.Sprintf("%s/%s", solutionDir, "Gemfile"), gemfileData, nil)
-	if err != nil {
-		return
-	} else {
-		files = append(files, "github.com/.../Gemfile")
-	}
-
-	aocSolutionData, err := getRawDataFromURL("https://raw.githubusercontent.com/joshmenden/aocplz/main/templates/aoc_solution.rb.tmpl", false)
-	if err != nil {
-		return
-	}
-
-	err = copyFile(nil, fmt.Sprintf("%s/%s", os.Getenv("AOCPLZ_ROOT_DIR"), "aoc_solution.rb"), aocSolutionData, nil)
-	if err != nil {
-		return
-	} else {
-		files = append(files, "github.com/.../aoc_solution.rb")
-	}
-
-	return
-}
-
-func createSolutionFiles(solutionDir string) (files []string, err error) {
-	tmplsDir := os.Getenv("AOCPLZ_TEMPLATES_DIR")
-	tmplsStr := os.Getenv("AOCPLZ_TEMPLATE_FILES")
-
-	if tmplsDir != "" && tmplsStr != "" {
-		return copyLocalFiles(tmplsDir, tmplsStr, solutionDir)
-	} else {
-		return copyGlobalFilesFromGithub(solutionDir)
-	}
+	return destPath, nil
 }
 
 func openPuzzle(day, year int) bool {
